@@ -1,0 +1,108 @@
+{% extends 'user/user_base.html' %}
+{% block title %}
+收货地址
+{% endblock %}
+{%block right_content %}
+		<div class="right_content clearfix">
+				<h3 class="common_title2">收货地址</h3>
+				<div class="site_con">
+					<dl>
+						<dt>当前地址：</dt>
+                        {% if address %}
+						<dd>{{ address.address }} ({{ address.recipient }} 收) 电话：{{ address.contact_num }} 邮编：{{ address.zip_code }} </dd>
+                            {% else %}
+                            <dd>无默认收货地址</dd>
+                        {% endif %}
+					</dl>
+				</div>
+				<h3 class="common_title2">编辑地址</h3>
+				<div class="site_con">
+					<form method="post" id="addr-form">
+						{%csrf_token%}
+						<div class="form_group">
+							<label>收件人：</label>
+							<input type="text" id="recipient" name="recipient" value="">
+                            <p class="error_tip" style="color:red"></p>
+						</div>
+						<div class="form_group form_group2">
+							<label>详细地址：</label>
+							<textarea class="site_area" name="address"></textarea>
+                            <div class="error_tip" style="display: inline-block;color:red;"></div>
+						</div>
+						<div class="form_group">
+							<label>邮编：</label>
+							<input type="text" name="zip_code" id="zip_code" value="">
+                            <p class="error_tip"></p>
+						</div>
+						<div class="form_group">
+							<label>手机：</label>
+							<input type="text" name="phone" id="phone" value="">
+                            <p class="error_tip" style="color:red"></p>
+						</div>
+
+						<input type="submit" name="" value="提交" class="info_submit">
+					</form>
+				</div>
+		</div>
+	</div>
+{%endblock right_content %}
+{% block js %}
+    <script>
+        $(function () {
+            $('#recipient').blur(function () {
+                checkRecipient()
+            })
+            $('.site_area').blur(function () {
+                checkAddress()
+            })
+            $('#phone').blur(function () {
+                checkPhone()
+            })
+        })
+        function checkRecipient() {
+            if($('#recipient').val().length==0){
+                errorRecipient = true
+                $('#recipient').next().html('请输入收件人名称')
+            }
+            else{
+                $('#recipient').next().html('')
+                errorRecipient = false
+            }
+        }
+        function checkAddress() {
+            if($('.site_area').val().length==0){
+                errorAddress = true
+                $('.site_area').next().html('请输入收货地址')
+            }
+            else{
+                $('.site_area').next().html('')
+                errorAddress = false
+            }
+        }
+        function checkPhone() {
+            reg = /^1[3|4|5|8][0-9]\d{4,8}$/
+            if(reg.test($('#phone').val())){
+                errorPhone = false
+                $('#phone').next().html('')
+            }
+            else {
+                errorPhone = true
+                $('#phone').next().html('请输入正确的电话号码')
+
+            }
+        }
+        $('#addr-form').submit(function () {
+            checkAddress()
+            checkPhone()
+            checkRecipient()
+            if(errorAddress==false && errorPhone==false &&errorRecipient==false){
+                console.log('successful')
+                return true
+            }
+            else{
+                console.log('failed')
+                return false
+            }
+        })
+    </script>
+{% endblock %}

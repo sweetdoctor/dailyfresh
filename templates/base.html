@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+{% load staticfiles %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'common_css/reset.css' %}">
+    <link rel="stylesheet" href="{% static 'common_css/main.css' %}">
+    {% block css %}{% endblock %}
+</head>
+<body>
+    {% block header %}{% endblock %}
+    {% block main %}{% endblock %}
+    {% include 'footer.html' %}
+    <script src="{% static 'common_js/jquery1.11.0.js' %}"></script>
+    <script src="{% static 'common_js/jquery-ui.min.js' %}"></script>
+    {% block js %}{% endblock %}
+</body>
+</html>

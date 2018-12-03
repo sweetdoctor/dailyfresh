@@ -1,0 +1,93 @@
+{% extends 'user/user_base.html' %}
+{% block title %}
+    用户订单
+{% endblock %}
+{% block right_content %}
+    <div class="right_content clearfix">
+    <h3 class="common_title2">全部订单</h3>
+    {% csrf_token %}
+    {% for orderinfo in page.object_list %}
+    <ul class="order_list_th w978 clearfix">
+        <li class="col01">{{orderinfo.create_date}}</li>
+        <li class="col02">订单号：{{orderinfo.order_id}}</li>
+
+        <li class="col02 stress">{{ orderinfo.status }}</li>
+    </ul>
+    <table class="order_list_table w980">
+        <tbody>
+        <tr>
+            <td width="55%">
+                {% for item in orderinfo.ps %}
+                <ul class="order_goods_list clearfix">
+                    <li class="col01"><img src="{{ item.image }}"></li>
+                    <li class="col02">{{item.name}}<em><span>{{item.price}}</span>元/{{item.unite}}</em>
+                    </li>
+                    <li class="col03">{{item.count}}个</li>
+                    <li class="col04">{{ item.total }}</li>
+                </ul>
+                {% endfor %}
+            </td>
+            <td width="15%">{{ orderinfo.product_price }}元</td>
+            <td width="15%"><a href="javascript:void(0)" data-status="{{ orderinfo.status }}" data-id="{{ orderinfo.order_id }}" class="oper_btn">去支付</a></td>
+{#            <td width="15%"><a href="#" class="oper_btn">查看物流</a></td>#}
+        </tr>
+        </tbody>
+    </table>
+    {% endfor %}
+    <div class="pagenation">
+        <div class="pagenation">
+        {% if page.has_previous %}
+        <a href="{% url 'user:userorder' page.previous_page_number %}">上一页</a>
+        {% endif %}
+        {%for pindex in show_nums%}
+        <!--如果选择的是当前页，则标记为活动样式-->
+        {%if pindex == page.number%}
+        <a href="#" class="active">{{pindex}}</a>
+        {%else%}
+        <a href="{% url 'user:userorder' pindex %}">{{pindex}}</a>
+        {%endif%}
+        {%endfor%}
+        {% if page.has_next %}
+        <a href="{% url 'user:userorder' page.next_page_number %}">下一页></a>
+        {% endif %}
+    </div>
+    </div>
+</div>
+{% endblock %}
+{% block js %}
+    <script>
+        status = $('.oper_btn').attr('data-status')
+        if(status=='待评价'){
+            $('.oper_btn').text('待评价')
+        }
+        $('.oper_btn').click(function () {
+            if(status=='待支付'){
+                csrfmiddlewaretoken = $('input[name="csrfmiddlewaretoken"]').val()
+                order_id = $(this).attr('data-id')
+                alert(order_id)
+                params = {csrfmiddlewaretoken, order_id}
+                $.post('/order/orderpay/', params, function (data) {
+                    if(data.res==3){
+                        window.open(data.pay)
+                        $.post('/order/checkorder/', params, function (data) {
+                            if(data.res==3){
+                                alert('支付成功')
+                                location.reload()
+                            }
+                            else {
+                                alert(data.msg)
+                            }
+                        })
+                    }
+                    else {
+                        alert(data.msg)
+                    }
+                })
+            }
+            else {
+                alert('yizhifu')
+            }
+
+        })
+    </script>
+{% endblock %}

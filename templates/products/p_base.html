@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block header %}
+    <div class="search_bar clearfix">
+    <a href="/" class="logo fl"><img src="/static/images/logo.png"></a>
+    <form method='get' action="/search/" target="_blank">
+    <div class="search_con fl">
+        <input type="text" class="input_text fl" name="q" placeholder="搜索商品">
+        <input type="submit" class="input_btn fr" name="" value="搜索">
+    </div>
+    </form>
+
+
+    {% if user.is_authenticated %}
+  <div class="guest_cart fr">
+        <a href="/cart/" class="cart_name fl">我的购物车</a>
+        <div class="goods_count fl" id="show_count">{{ cart_count }}</div>
+    </div>
+        {% else %}
+        <div class="guest_cart fr">
+            <a href="{% url 'user:login' %}" class="cart_name fl">我的购物车</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+{% block main %}
+<div class="navbar_con">
+    <div class="navbar clearfix">
+        <div class="subnav_con fl">
+            <h1>全部商品分类</h1>
+            <span></span>
+            <ul class="subnav">
+                {% for type in types %}
+                <li><a href="{% url 'product:list' type.id 1 %}" class="{{ type.logo }}">{{ type.category_name }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+        <ul class="navlist fl">
+            <li><a href="">首页</a></li>
+            <li class="interval">|</li>
+            <li><a href="">手机生鲜</a></li>
+            <li class="interval">|</li>
+            <li><a href="">抽奖</a></li>
+        </ul>
+    </div>
+</div>
+
+<div class="breadcrumb">
+    <a href="/">全部分类</a>
+    <span>></span>
+    {% if product %}
+    <a href="{% url 'product:list' product.type.id 1 %}">{{product.type.category_name}}</a>
+    <span>></span>
+    <a href="">商品详情</a>
+        {% else %}
+        <a href="{% url 'product:list' current_type.id 1 %}">{{current_type.category_name}}</a>
+    {% endif %}
+</div>
+
+
+{% block detail %}
+{% endblock detail%}
+
+<div class="main_wrap clearfix">
+    <div class="l_wrap fl clearfix">
+        <div class="new_goods">
+            <h3>新品推荐</h3>
+            <ul>
+                {%for np in new_products%}
+                <li>
+                    <a href="{% url 'product:detail' np.id %}"><img src="{{ np.image }}"></a>
+                    <h4><a href="{% url 'product:detail' np.id %}">{{np.name}}</a></h4>
+                    <div class="prize">￥{{np.price}}</div>
+                </li>
+                {%endfor%}
+            </ul>
+        </div>
+    </div>
+{% block list %}
+{% endblock list %}
+</div>
+{% endblock main %}

@@ -1,0 +1,86 @@
+{%extends 'base.html'%}
+{% block title%}
+    列表页
+{% endblock %}
+{% block header %}
+    <div class="search_bar clearfix">
+    <a href="/" class="logo fl"><img src="/static/images/logo.png"></a>
+    <form method='get' action="/search/" target="_blank">
+        <div class="search_con fl">
+                <input type="text" class="input_text fl" name="q" placeholder="搜索商品">
+                <input type="submit" class="input_btn fr" name="" value="搜索">
+        </div>
+    </form>
+
+
+    {% if user.is_authenticated %}
+  <div class="guest_cart fr">
+        <a href="/cart/" class="cart_name fl">我的购物车</a>
+        <div class="goods_count fl" id="show_count">{{ cart_count }}</div>
+    </div>
+        {% else %}
+        <div class="guest_cart fr">
+            <a href="{% url 'user:login' %}" class="cart_name fl">我的购物车</a>
+        </div>
+    {% endif %}
+</div>
+    <div class="navbar_con">
+    <div class="navbar clearfix">
+        <div class="subnav_con fl">
+            <h1>全部商品分类</h1>
+            <span></span>
+            <ul class="subnav">
+                {% for type in types %}
+                <li><a href="{% url 'product:list' type.id 1 %}" class="{{ type.logo }}">{{ type.category_name }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+        <ul class="navlist fl">
+            <li><a href="">首页</a></li>
+            <li class="interval">|</li>
+            <li><a href="">手机生鲜</a></li>
+            <li class="interval">|</li>
+            <li><a href="">抽奖</a></li>
+        </ul>
+    </div>
+</div>
+{% endblock %}
+{% block main %}
+<div class="r_wrap fr clearfix">
+    <ul class="goods_type_list clearfix">
+        {%for p in page %}
+        <li>
+            <a href="{% url 'product:detail' p.object.id %}"><img src="{{ p.object.image }}"></a>
+            <h4><a href="{% url 'product:detail' p.object.id %}">{{p.object.name}}</a></h4>
+            <div class="operate">
+                <span class="prize">￥{{p.object.price}}</span>
+                <span class="unit">{{p.object.unite}}</span>
+                <span class="unit">销量{{p.object.sales}}</span>
+                {% if request.session.user_name|default:'' != '' %}
+					<a href="javascript:;" id="{{ g.id }}" class="add_goods" title="加入购物车"></a>
+				{% else %}
+      				<a href="/user/login/" class="add_goods" title="加入购物车"></a>
+				{% endif %}
+            </div>
+        </li>
+        {%endfor%}
+    </ul>
+
+    <div class="pagenation">
+        {% if page.has_previous %}
+        <a href="/search?q={{ query }}&page={{ page.previous_page_number }}">上一页</a>
+        {% endif %}
+        {%for pindex in paginator.page_range%}
+        <!--如果选择的是当前页，则标记为活动样式-->
+        {%if pindex == page.number%}
+        <a href="/search?q={{ query }}&page={{ pindex }}" class="active">{{pindex}}</a>
+        {%else%}
+        <a href="/search?q={{ query }}&page={{ pindex }}">{{pindex}}</a>
+        {%endif%}
+        {%endfor%}
+        {% if page.has_next %}
+        <a href="/search?q={{ query }}&page={{ page.next_page_number }}">下一页></a>
+        {% endif %}
+    </div>
+</div>
+{%endblock main%}

@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block title %}
+    主页
+{% endblock %}
+{% block header %}
+    <div class="header_con">
+    <div class="header">
+        <div class="welcome fl">欢迎来到天天生鲜!</div>
+        <div class="fr">
+            <div class="login_btn fl">
+                <a href="{% url 'user:login' %}">登录</a>
+                <span>|</span>
+                <a href="{% url 'user:register' %}">注册</a>
+            </div>
+
+        </div>
+    </div>
+</div>
+<div class="search_bar clearfix">
+    <a href="/" class="logo fl"><img src="/static/images/logo.png"></a>
+    <form method='get' action="/search/" target="_blank">
+    <div class="search_con fl">
+        <input type="text" class="input_text fl" name="q" placeholder="搜索商品">
+        <input type="submit" class="input_btn fr" name="" value="搜索">
+    </div>
+    </form>
+        <div class="guest_cart fr">
+            <a href="{% url 'cart:cart' %}" class="cart_name fl">我的购物车</a>
+        </div>
+</div>
+{% endblock %}
+{% block main %}
+	<div class="navbar_con">
+		<div class="navbar">
+			<h1 class="fl">全部商品分类</h1>
+			<ul class="navlist fl">
+				<li><a href="/">首页</a></li>
+				<li class="interval">|</li>
+				<li><a href="#">手机生鲜</a></li>
+				<li class="interval">|</li>
+				<li><a href="#">抽奖</a></li>
+			</ul>
+		</div>
+	</div>
+
+	<div class="center_con clearfix">
+		<ul class="subnav fl">
+            {% for type in types %}
+			<li><a href="#model0{{ forloop.counter }}" class="{{ type.logo }}">{{ type.category_name }}</a></li>
+            {% endfor %}
+		</ul>
+		<div class="slide fl">
+			<ul class="slide_pics">
+                {% for c_img in banners %}
+				<li><img src="{{ c_img.image }}" alt="幻灯片"></li>
+                {% endfor %}
+			</ul>
+			<div class="prev"></div>
+			<div class="next"></div>
+			<ul class="points"></ul>
+		</div>
+		<div class="adv fl">
+            {% for p in promotion %}
+			<a href="#"><img src="{{ p.image }}"></a>
+{#			<a href="#"><img src="/static/images/adv02.jpg"></a>#}
+            {% endfor %}
+		</div>
+	</div>
+    {% for c in types %}
+	<div class="list_model">
+		<div class="list_title clearfix">
+			<h3 class="fl" id="model0{{ forloop.counter }}">{{ c.category_name }}</h3>
+			<div class="subtitle fl">
+				<span>|</span>
+				{%for p in c.word_show%}
+				<a href="/{{p.product.id}}">{{p.product.name|slice:'10'}}...</a>
+				{%endfor%}
+			</div>
+			<a href="/list2_1_1" class="goods_more fr" id="fruit_more">查看更多 ></a>
+		</div>
+
+		<div class="goods_con clearfix">
+			<div class="goods_banner fl"><img src="{{ c.image }}"></div>
+			<ul class="goods_list fl">
+				{%for pic_p in c.pic_show%}
+				<li>
+					<!--images/goods/goods003.jpg-->
+					<h4><a href="/{{pic_p.id}}">{{pic_p.product.name|slice:'10'}}...</a></h4>
+					<a href="/{{g.id}}"><img src="{{pic_p.product.image}}"></a>
+					<div class="prize">¥{{pic_p.product.price}}</div>
+				</li>
+				{%endfor%}
+			</ul>
+		</div>
+	</div>
+    {% endfor %}
+{% endblock %}
+{% block js%}
+    <script src="{% static 'product/slide.js' %}"></script>
+    <script type="text/javascript">
+{#		BCSlideshow('focuspic');#}
+		var oFruit = document.getElementById('fruit_more');
+		var oShownum = document.getElementById('show_count');
+
+		var hasorder = localStorage.getItem('order_finish');
+
+		if(hasorder)
+		{
+			oShownum.innerHTML = '2';
+		}
+
+		oFruit.onclick = function(d){
+			window.location.href = 'list.html';
+		}
+	</script>
+{% endblock %}

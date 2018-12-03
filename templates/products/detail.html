@@ -1,0 +1,133 @@
+{% extends 'products/p_base.html' %}
+{% block title %}
+    详情页
+{% endblock %}
+{% block detail %}
+	<div class="goods_detail_con clearfix">
+		<div class="goods_detail_pic fl"><img src="{{ product.image }}"></div>
+
+		<div class="goods_detail_list fr" data-id="{{ product.id }}">
+			<h3>{{product.name}}</h3>
+			<p>{{product.desc}}</p>
+			<div class="prize_bar">
+				<span class="show_pirze">¥<em id="gprice">{{product.price}}</em></span>
+				<span class="show_unit">单  位：{{product.unite}}</span>
+			</div>
+			<div id="genghuan">
+                <div class="goods_num clearfix">
+                    <div class="num_name fl">数 量：</div>
+                    <div class="num_add fl">
+                        <input type="text" class="num_show fl" value="1" id="num_show">
+                        <a href="javascript:;" class="add fr" id="add">+</a>
+                        <a href="javascript:;" class="minus fr" id="minus">-</a>
+                    </div>
+                    <div style="margin-left: 350px;line-height: 53px;overflow: hidden;">
+                        <div style="width: 77px;height: 52px; float: left">库 存：</div>
+                        <div style="border: 1px solid #dddddd;width: 77px;height: 52px;text-align: center;line-height: 53px;
+                                overflow: hidden;font-size: 20px;" id="kucun">{{ product.inventory }}</div>
+                    </div>
+                </div>
+                <div>
+                    <div>规格:</div>
+                        <ul>
+                            {% for standard in same_spu_products %}
+                                <li><a href="{% url 'product:detail' standard.id%}">{{ standard.unite }}</a></li>
+                            {% endfor %}
+                        </ul>
+
+                </div>
+                <div class="total">总价：<em id="gtotal"></em></div>
+                <div class="operate_btn">
+                {% csrf_token %}
+                    {% if request.user %}
+                        <a href="javascript:;" class="buy_btn" id="buy">立即购买</a>
+                    {% else %}
+                        <a href="/user/login/" class="buy_btn" id="buy">立即购买</a>
+                    {% endif %}
+                    {% if request.user %}
+                        <a href="javascript:;" class="add_cart" id="add_cart">加入购物车</a>
+                    {% else %}
+                        <a href="/user/login/" class="add_cart" id="add_cart">加入购物车</a>
+                    {% endif %}
+                </div>
+            </div>
+		</div>
+	</div>
+{% endblock detail%}
+
+{% block list %}
+		<div class="r_wrap fr clearfix">
+			<ul class="detail_tab clearfix">
+				<li class="active">商品介绍</li>
+				<li>评论</li>
+			</ul>
+
+			<div class="tab_content">
+				<dl>
+					<dt>商品详情：</dt>
+					<dd>{{product.products.detail|safe}}</dd>
+				</dl>
+			</div>
+
+		</div>
+{% endblock list %}
+{% block js %}
+    <script>
+        $(function(){
+            $('#add').click(function () {
+                var value = parseInt($('#num_show').val())
+                var inventory = parseInt($('#kucun').text())
+                {#alert(inventory)#}
+                if(value>=inventory){
+                    $('#num_show').val(value)
+                    cal_price()
+                    return;
+                }
+                value += 1
+                $('#num_show').val(value)
+                cal_price()
+            });
+            $('#num_show').blur(function () {
+                let count = parseInt($('#num_show').val())
+                if(isNaN(count)||count<=0){
+                    $('#num_show').val(1)
+                }
+            })
+            $('#minus').click(function () {
+                var value = parseInt($('#num_show').val())
+                if(value<=0){
+                    return;
+                }
+                value -= 1
+                $('#num_show').val(value)
+                cal_price()
+            });
+            cal_price()
+            $('#add_cart').click(function () {
+                sku_id = $('.goods_detail_list').attr('data-id')
+                count = $('#num_show').val()
+                csrfmiddlewaretoken = $('input[name="csrfmiddlewaretoken"]').val()
+                params = {sku_id, count, csrfmiddlewaretoken}
+
+                $.post('/cart/addcart', params, function (data) {
+                    if(data.status == 5){
+                        $('#show_count').text(data.total_count)
+                        {#alert('successful')#}
+                    }
+                    else{
+                        alert(data.msg)
+                    }
+
+                })
+            })
+        })
+        function cal_price() {
+            single_price = $('#gprice').text()
+            count = $('#num_show').val()
+            total_price = parseFloat(single_price) * parseInt(count)
+            $('#gtotal').text(total_price.toFixed(2)+'元')
+        }
+
+    </script>
+
+{% endblock %}

@@ -1,0 +1,60 @@
+<div class="header_con">
+    <div class="header">
+        <div class="welcome fl">欢迎来到天天生鲜!</div>
+        <div class="fr">
+            {% if user.is_authenticated %}
+             <div class="user_link fl">
+                <a href="{% url 'user:userinfo' %}">欢迎您：{{user.username}}</a>
+                <span>|</span>
+                 <a href="{% url 'user:logout' %}">退出</a>
+                <span>|</span>
+                <a href="{% url 'user:userinfo' %}">用户中心</a>
+                <span>|</span>
+                <a href="{% url 'cart:cart' %}">我的购物车</a>
+                <span>|</span>
+                <a href="{% url 'user:userorder' 1 %}">我的订单</a>
+            </div>
+            {% else %}
+            <div class="login_btn fl">
+                <a href="{% url 'user:login' %}/">登录</a>
+                <span>|</span>
+                <a href="{% url 'user:register' %}">注册</a>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+<div class="search_bar clearfix">
+    <a href="/" class="logo fl"><img src="/static/images/logo.png"></a>
+    {% if page_name == 1%}
+    <div class="sub_page_name fl">{{title}}</div>
+    <form method='get' action="/search/" target="_blank">
+    <div class="search_con fr">
+        <input type="text" class="input_text fl" name="q" placeholder="搜索商品">
+        <input type="submit" class="input_btn fr" name="" value="搜索">
+    </div>
+    </form>
+    {% endif %}
+    {% if guest_cart == 1 %}
+    <form method='get' action="/search/" target="_blank">
+    <div class="search_con fl">
+        <input type="text" class="input_text fl" name="q" placeholder="搜索商品">
+        <input type="submit" class="input_btn fr" name="" value="搜索">
+    </div>
+    </form>
+
+
+
+  {% if request.session.user_name|default:'' != '' %}
+  <div class="guest_cart fr">
+        <a href="/cart/" class="cart_name fl">我的购物车</a>
+        <div class="goods_count fl" id="show_count">{{count}}</div>
+    </div>
+  {% else %}
+  <div class="guest_cart fr">
+    <a href="/user/login/" class="cart_name fl">我的购物车</a>
+  </div>
+  {% endif %}
+  {% endif %}
+</div>

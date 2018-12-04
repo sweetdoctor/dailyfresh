@@ -10,6 +10,8 @@ from django.db import transaction
 from alipay import AliPay
 from dailyfresh.settings import BASE_DIR
 
+
+# 生成订单
 @transaction.atomic
 def create_order(request):
     if request.method == 'POST':
@@ -115,6 +117,7 @@ def payorder(request):
     return redirect(reverse('cart:cart'))
 
 
+# 生成支付链接
 def orderpay(request):
     if request.method == 'POST':
         user = request.user
@@ -158,6 +161,7 @@ def orderpay(request):
         # 电脑网站支付，需要跳转到https://openapi.alipay.com/gateway.do? + order_string
         order_string = alipay.api_alipay_trade_page_pay(
             out_trade_no=order_id,
+            # Decimal类型需要转化成字符串
             total_amount=str(total_price),
             subject=subject,
             return_url=None,
@@ -167,6 +171,7 @@ def orderpay(request):
         return JsonResponse({'res': 3, 'pay': pay_url})
 
 
+# 查询订单状态状态
 def checkorder(request):
     user = request.user
     if not user.is_authenticated():
@@ -195,19 +200,14 @@ def checkorder(request):
         response = alipay.api_alipay_trade_query(order_id)
         code = response.get('code')
         if code == '10000' and response['trade_status'] == 'TRADE_SUCCESS':
-            print('1', code)
             order.trance_num = response.get('trade_no')
             order.order_status = 4
             order.save()
             return JsonResponse({'res': 3, 'msg': '支付成功'})
         elif code == '40004' or (code == '10000' and response['trade_status'] == 'WAIT_BUYER_PAY'):
             # 等待支付
-            print('2', code)
-            from time import sleep
-            sleep(4)
             continue
         else:
-            print('3', code)
             return JsonResponse({'res': 4, 'msg': '支付失败'})
 
 

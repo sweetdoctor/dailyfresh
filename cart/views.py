@@ -1,7 +1,5 @@
 from django.shortcuts import render
-from django_redis import get_redis_connection
 from django.http import JsonResponse
-from product.models import ProductSKU
 from django_redis import get_redis_connection
 from django.contrib.auth.decorators import login_required
 from product.models import ProductSKU
@@ -12,7 +10,6 @@ def cart(request):
     user = request.user
     conn = get_redis_connection('default')
     cart_key = 'cart_%d' % user.id
-    print(cart_key)
     carts = conn.hgetall(cart_key)
     total_count = 0
     cart_products = []
@@ -86,7 +83,7 @@ def update_cart(request):
         num = 0
         for value in conn.hgetall(cart_key).values():
             num += int(value)
-        return JsonResponse({'status': 5, 'msg': '添加成功', 'total_count': num})
+        return JsonResponse({'status': 5, 'msg': '添加成功', 'total_count': db_count})
 
 
 def delete(request):

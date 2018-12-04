@@ -1,6 +1,5 @@
 from django.core.files.storage import Storage
 from fdfs_client.client import Fdfs_client
-from dailyfresh.settings import FDFS_CLIENT, TRACKER_SERVER
 
 class FdfsStorage(Storage):
     def __init__(self, client_conf=None, tracker_server=None):

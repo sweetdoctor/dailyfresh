@@ -10,7 +10,7 @@ from django.http import JsonResponse
 def home(request):
     context = cache.get('index_page_cache')
     if context is None:
-        # print('没有缓存')
+        print('没有缓存')
         types = ProductCategory.objects.all()
         banners = ProductBanner.objects.all().order_by('index')
         promotion = PromotionPc.objects.all().order_by('index')

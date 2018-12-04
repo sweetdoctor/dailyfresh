@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block main %}
+    <h3>请前往邮箱激活邮件<span></span>秒后跳转到主页</h3>
+    <div></div>
+{% endblock %}
+{% block js %}
+    <script>
+count = 1
+        function f() {
+                $('span').text(count)
+                count = 1+count;
+                if(count==4){
+                    //$('span').text(count)
+                    clearInterval(id)
+                    window.location.href = '/'
+                }
+            }
+        id = setInterval('f()', 1000)
+
+   </script>
+{% endblock %}

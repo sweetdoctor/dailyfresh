@@ -8,18 +8,6 @@
         <input type="submit" class="input_btn fr" name="" value="搜索">
     </div>
     </form>
-
-
-{#    {% if user.is_authenticated %}#}
-{#  <div class="guest_cart fr">#}
-{#        <a href="/cart/" class="cart_name fl">我的购物车</a>#}
-{#        <div class="goods_count fl" id="show_count">{{ total_count }}</div>#}
-{#    </div>#}
-{#        {% else %}#}
-{#        <div class="guest_cart fr">#}
-{#            <a href="{% url 'user:login' %}" class="cart_name fl">我的购物车</a>#}
-{#        </div>#}
-{#    {% endif %}#}
 </div>
 {% endblock %}
 {% block title %}
@@ -37,7 +25,6 @@
 	</ul>
 <form action="{% url 'order:payorder' %}" method="post">
     {%for cart in carts%}
-
 	<ul class="cart_list_td clearfix" id="{{cart.id}}">
         {% csrf_token %}
 		<li class="col01"><input type="checkbox" name="sku_id" value="{{cart.id}}" checked="" class="checkbox"></li>
@@ -69,6 +56,7 @@
 {%endblock%}
 {% block js%}
     <script>
+        //计算总件数以及总价格
         function get_total_price(){
             total_price = 0
             total_count = 0
@@ -80,8 +68,8 @@
             })
             $('.settlements').find('#sumtotal').text(total_price)
             $('.settlements').find('.countGood').text(total_count)
-
         }
+        //当某个商品选中或者未选中时，更新当前页面的的状态
         $('.cart_list_td').find(':checkbox').change(function () {
             all_len = $('.cart_list_td').find(':checkbox').length
             check_len = $('.cart_list_td').find(':checked').length
@@ -109,6 +97,7 @@
             count = parseInt(count) + 1
             csrfmiddlewaretoken = $('input[name="csrfmiddlewaretoken"]').val()
             params = {sku_id, count, csrfmiddlewaretoken}
+            // 设置ajax请求为同步方式
             $.ajaxSettings.async = false
             $.post('/cart/updatecart', params, function (data) {
             if(data.status == 5){
@@ -217,7 +206,7 @@
                  if($(this).parents('ul').find(':checked')){
                      get_total_price()
                  }
-                 alert('shanchuchenggong')
+                 {#alert('shanchuchenggong')#}
                 }
                 else{
                     alert(data.msg)

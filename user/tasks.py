@@ -9,8 +9,7 @@ def send_register_email(username, token, email):
     title = '天天生鲜欢迎信息'
     body = '<h1>{name}，欢迎成为天天生鲜会员</h1>请点击下面链接激活账号<a href="http://127.0.0.1:8000/user/register/active/{token}">http://127.0.0.1:8000/user/register/active/{token}</a>'.format(
         name=username, token=token)
-    print(body)
     try:
         send_mail(title, message, settings.EMAIL_FROM, [email], html_message=body)
     except Exception as e:
-        print(e)
+        pass

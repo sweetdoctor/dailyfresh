@@ -64,7 +64,6 @@
             if(status=='待支付'){
                 csrfmiddlewaretoken = $('input[name="csrfmiddlewaretoken"]').val()
                 order_id = $(this).attr('data-id')
-                alert(order_id)
                 params = {csrfmiddlewaretoken, order_id}
                 $.post('/order/orderpay/', params, function (data) {
                     if(data.res==3){

@@ -1,3 +1,4 @@
+// 入口函数，检测登录账号输入合法性
 $(function () {
     $('.name_input').blur(function () {
         checkUser()
@@ -7,6 +8,7 @@ $(function () {
     })
 })
 
+//检测用户名合法性
 function checkUser() {
     nameLength = $('.name_input').val().length;
     if(nameLength!==0){
@@ -20,7 +22,7 @@ function checkUser() {
         $('.name_input').next().show()
     }
 }
-
+//检测输入密码合法性
 function checkPwd() {
     pwdLength = $('.pass_input').val().length
     if(pwdLength == 0){
@@ -33,6 +35,7 @@ function checkPwd() {
         $('.pass_input').next().hide()
     }
 }
+//提交表单是重新检测
 $('#form').submit(function () {
     checkUser()
     checkPwd()

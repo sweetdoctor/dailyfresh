@@ -2,8 +2,6 @@ from django.shortcuts import render, HttpResponse, redirect
 from user.models import User
 from django.conf import settings
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer, SignatureExpired
-from django.core.mail import send_mail
-# from dailyfresh.tasks import send_register_email
 from django.core.urlresolvers import reverse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -16,28 +14,23 @@ from django.core.paginator import Paginator, EmptyPage
 
 
 def register(request):
+    # get请求返回注册页面，post请求进行注册
     if request.method == "POST":
+        # 获取提交过来的数据
         username = request.POST['user_name']
         pwd = request.POST['pwd']
         email = request.POST['email']
-        print(username, pwd, email)
-        # 自动加密
+        # create_user()方法会对密码进行hash
         user = User.objects.create_user(username, email, pwd)
+        # 账户的激活状态为0表示未激活
         user.is_active = 0
         user.save()
-        # 发送激活链接
+        # 发送激活链接，生成加密的token
         active_id = {'confirm': username}
         token = Serializer(settings.SECRET_KEY, 3600).dumps(active_id)
         # print(type(token))
         token = str(token, encoding='utf-8')
-        # print(type(token))
-        # message = ''
-        # title = '天天生鲜欢迎信息'
-        # body = '<h1>{name}，欢迎成为天天生鲜会员</h1>请点击下面链接激活账号<a href="http://127.0.0.1/user/register/active/{token}">http://127.0.0.1/user/register/active/{token}</a>'.format(name=username, token=token)
-        # try:
-        #     send_mail(title, message, settings.EMAIL_FROM, [email], html_message=body)
-        # except Exception as e:
-        #     print(e)
+        # 将任务发送到Redis消息队列中，异步执行
         send_register_email.delay(username, token, email)
         return redirect(reverse('product:home'))
     return render(request, 'user/register.html')
@@ -61,6 +54,7 @@ def active_acount(request, token):
 
 
 def check_name(request, name):
+    # 尝试从数据库查找该用户名是否存在，如果有返回0，否则返回1
     try:
         user = User.objects.get(username=name)
     except Exception as e:
@@ -78,18 +72,15 @@ def tt_login(request):
         password = request.POST['pwd']
         # 获取复选框value值，以列表的形式，没有选中value值为空
         remember = request.POST.getlist('remember')
-        print(request.GET)
         next_url = request.GET.get('next', reverse('product:home'))
-        print(next_url)
         # 密文验证
         user = authenticate(username=username, password=password)
         if user is not None:
             if not user.is_active:
-                return HttpResponse('请前往邮箱激活')
+                return render(request, 'user/register_active.html')
             else:
                 # 记录用户登录状态
                 login(request, user)
-
                 response = redirect(next_url)
                 if len(remember)==1:
                     response.set_cookie('name', username, max_age=7*24*3600)
@@ -107,12 +98,13 @@ def tt_login(request):
 
 def user_logout(request):
     logout(request)
-    return redirect('product:home')
+    return redirect(reverse('product:home'))
 
 
 @login_required
 def user_info(request):
     user = request.user
+    # 自定义管理类，并封装get_default_addr方法
     address = UserAddress.objects.get_default_addr(user)
     # 获取用户浏览记录
     con = get_redis_connection('default')
@@ -132,13 +124,11 @@ def useraddress(request):
     if request.method == 'POST':
         recipient = request.POST['recipient']
         address = request.POST['address']
-        zip_code = int(request.POST['zip_code'])
+        try:
+            zip_code = int(request.POST['zip_code'])
+        except Exception:
+            pass
         phone = request.POST['phone']
-
-        # try:
-        #     default_addr = UserAddress.objects.get(user=user, is_default=True)
-        # except UserAddress.DoesNotExist:
-        #     default_addr = None
         default_addr = UserAddress.objects.get_default_addr(user)
         if default_addr:
             is_default = False
@@ -159,13 +149,17 @@ def user_order(request, page_num):
     for o in orders:
         ps = OrderProduct.objects.filter(order_info=o)
         for amount in ps:
+            # 动态为每个订单提供小计
             total = amount.price * amount.count
             amount.total = total
+        # 动态为每个订单提供订单下所有商品信息
         o.ps = ps
         # 获取订单的状态
         o.status = ord_status[str(o.order_status)]
+    # 使用Django内置分页，每页显示1个订单
     page_manage = Paginator(orders, 1)
     try:
+        # 创建Page对象，如果页面取不到，得到第一个页面page对象
         page = page_manage.page(page_num)
     except EmptyPage:
         page = page_manage.page(1)

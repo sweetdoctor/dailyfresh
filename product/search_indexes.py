@@ -1,4 +1,3 @@
-import datetime
 from haystack import indexes
 from product.models import ProductSKU
 
